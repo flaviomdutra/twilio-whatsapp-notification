@@ -26,6 +26,20 @@ class ApplicationSettingsTest {
     }
 
     @Test
+    void selectsLocalProfileAndAllowsEnvironmentOverrides() {
+        var local = ApplicationSettings.load(Map.of("APP_PROFILE", "local"));
+        assertEquals("http://localhost:4566", local.get("sqs.endpoint", "SQS_ENDPOINT"));
+        assertEquals("console", local.get("whatsapp.provider", "WHATSAPP_PROVIDER"));
+        assertEquals("twilio/whatsapp", local.get("twilio.secret.id", "TWILIO_SECRET_ID"));
+        assertEquals("other", ApplicationSettings.load(Map.of("APP_PROFILE", "local", "SQS_QUEUE_NAME", "other"))
+                .get("sqs.queue.name", "SQS_QUEUE_NAME"));
+        var standard = ApplicationSettings.load(Map.of());
+        assertEquals("", standard.get("sqs.endpoint", "SQS_ENDPOINT"));
+        assertEquals("twilio", standard.get("whatsapp.provider", "WHATSAPP_PROVIDER"));
+        assertThrows(IllegalArgumentException.class, () -> ApplicationSettings.load(Map.of("APP_PROFILE", "unknown")));
+    }
+
+    @Test
     void rejectsInvalidConfigurationStructure() throws Exception {
         assertThrows(IllegalArgumentException.class, () -> settings("- unexpected", Map.of()));
         assertThrows(IllegalArgumentException.class, () -> settings("sqs:\n  endpoint: 123", Map.of()).get("sqs.endpoint", "SQS_ENDPOINT"));

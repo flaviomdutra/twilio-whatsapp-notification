@@ -6,7 +6,7 @@ This is a Java 17 Maven application for WhatsApp notifications. Production code 
 
 - `domain/` contains the message model and business service; `application/port/` defines use cases and provider interfaces.
 - `adapter/in/` contains the Lambda and SQS consumers; `adapter/out/` contains the Twilio adapter. Wire implementations in `config/ApplicationFactory.java`.
-- `src/test/java/` contains JUnit tests, `src/main/resources/application.yaml` holds non-secret defaults (environment variables override them), and `docker/localstack/init.sh` creates the local queues and DLQ.
+- `src/test/java/` contains JUnit tests, `src/main/resources/application.yaml` holds non-secret defaults and `application-local.yaml` configures the local profile (environment variables override both), and `docker/localstack/init.sh` creates the local queues and DLQ.
 
 Keep domain and application ports independent of AWS, Twilio, and transport details. Add integrations behind adapters and inject dependencies into the use case.
 
@@ -17,7 +17,7 @@ Prerequisites: Java 17+, Maven, and Docker Compose.
 - `mvn test` runs the unit tests.
 - `mvn clean package` builds and tests the application and creates the executable JAR in `target/`.
 - `docker compose up -d` starts LocalStack and initializes the SQS queues.
-- `AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_REGION=us-east-1 SQS_ENDPOINT=http://localhost:4566 WHATSAPP_PROVIDER=console java -jar target/twilio-whatsapp-notification-1.0-SNAPSHOT.jar` starts the LocalStack consumer with simulated delivery.
+- `APP_PROFILE=local AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_REGION=us-east-1 java -jar target/twilio-whatsapp-notification-1.0-SNAPSHOT.jar` starts the LocalStack consumer with simulated delivery.
 - `docker compose down` stops the local environment. See `README.md` for an example SQS message and DLQ inspection.
 
 ## Coding Style & Naming

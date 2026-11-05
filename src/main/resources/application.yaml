@@ -1,4 +1,4 @@
-# Variáveis de ambiente têm prioridade. Endpoints vazios usam a AWS.
+# Environment variables take precedence. Empty endpoints use AWS.
 sqs:
   queue:
     name: whatsapp-notifications

@@ -19,11 +19,24 @@ public final class ApplicationSettings {
     }
 
     public static ApplicationSettings load() {
-        try (InputStream stream = ApplicationSettings.class.getResourceAsStream("/application.yaml")) {
-            if (stream == null) throw new IllegalStateException("Missing application.yaml");
-            return fromYaml(stream, System.getenv());
+        return load(System.getenv());
+    }
+
+    public static ApplicationSettings load(Map<String, String> environment) {
+        String profile = environment.getOrDefault("APP_PROFILE", "");
+        String resource;
+        if (profile.isBlank() || profile.equals("default")) {
+            resource = "/application.yaml";
+        } else if (profile.equals("local")) {
+            resource = "/application-local.yaml";
+        } else {
+            throw new IllegalArgumentException("Unsupported APP_PROFILE: " + profile);
+        }
+        try (InputStream stream = ApplicationSettings.class.getResourceAsStream(resource)) {
+            if (stream == null) throw new IllegalStateException("Missing " + resource);
+            return fromYaml(stream, environment);
         } catch (IOException e) {
-            throw new UncheckedIOException("Cannot load application.yaml", e);
+            throw new UncheckedIOException("Cannot load " + resource, e);
         }
     }
 

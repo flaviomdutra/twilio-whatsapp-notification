@@ -1,0 +1,14 @@
+# Local profile: SQS and Secrets Manager in LocalStack; simulated WhatsApp delivery.
+sqs:
+  queue:
+    name: whatsapp-notifications
+    url: ""
+  endpoint: http://localhost:4566
+whatsapp:
+  provider: console
+twilio:
+  secret:
+    id: twilio/whatsapp
+secrets:
+  manager:
+    endpoint: http://localhost:4566
