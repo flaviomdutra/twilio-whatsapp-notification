@@ -23,7 +23,7 @@ class SqsConsumerTest {
                 message("one", "receipt-one", "{\"to\":\"whatsapp:+1\",\"body\":\"ok\"}"),
                 message("bad", "receipt-bad", "{\"body\":\"missing recipient\"}"),
                 message("failure", "receipt-failure", "{\"to\":\"whatsapp:+2\",\"body\":\"fail\"}"),
-                message("two", "receipt-two", "{\"to\":\"whatsapp:+3\",\"body\":\"ok\"}"));
+                message("two", "receipt-two", "{\"to\":\"whatsapp:+3\",\"contentSid\":\"HX123\",\"contentVariables\":{\"1\":\"Jane\"}}"));
         SqsClient client = (SqsClient) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[]{SqsClient.class},
                 (proxy, method, args) -> {
                     if (method.getName().equals("receiveMessage")) {
@@ -37,7 +37,7 @@ class SqsConsumerTest {
                     throw new UnsupportedOperationException(method.getName());
                 });
         new SqsConsumer(client, "queue-url", message -> {
-            if (message.body().equals("fail")) throw new IllegalStateException();
+            if ("fail".equals(message.body())) throw new IllegalStateException();
             processed.add(message.to());
         }).poll();
         assertEquals(List.of("whatsapp:+1", "whatsapp:+3"), processed);

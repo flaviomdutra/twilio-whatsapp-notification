@@ -47,6 +47,20 @@ docker compose exec localstack awslocal sqs receive-message \
 
 Stop the consumer with Ctrl+C and the local environment with `docker compose down`.
 
+## Send a template
+
+For template messages, send a `contentSid` and, optionally, a `contentVariables` object instead of `body`:
+
+```bash
+docker compose exec localstack awslocal sqs send-message \
+  --queue-url http://localhost:4566/000000000000/whatsapp-notifications \
+  --message-body '{"to":"whatsapp:+5511999999999","contentSid":"HX_YOUR_TEMPLATE_SID","contentVariables":{"1":"Jane","2":"12345"}}'
+```
+
+Replace the recipient, Content SID, and variable names and values with those for your template. Content variables are an object of string keys and string values; omit `contentVariables` if the template needs none. Each message must contain exactly one of a non-empty `body` or `contentSid`. Invalid messages are retried and eventually sent to the DLQ.
+
+To actually send, select `WHATSAPP_PROVIDER=twilio` and configure a Messaging Service with a WhatsApp sender. Outside the 24-hour customer service window, the template must be approved for WhatsApp. The Twilio API accepting the message does not guarantee delivery; check its final status in Twilio Messaging Logs. See [Twilio's template sending guide](https://www.twilio.com/docs/content/send-templates-created-with-the-content-template-builder).
+
 ## Configure the Twilio secret
 
 LocalStack creates `twilio/whatsapp` with placeholder values. To load it, set the endpoints and dummy AWS credentials before starting the consumer:
@@ -63,10 +77,10 @@ The `twilio` mode attempts real delivery: replace the placeholders in LocalStack
 In AWS Secrets Manager, create a text secret using this format (the values are placeholders):
 
 ```json
-{"accountSid":"AC...","authToken":"...","fromNumber":"whatsapp:+14155238886"}
+{"accountSid":"AC...","authToken":"...","fromNumber":"MG_YOUR_MESSAGING_SERVICE_SID"}
 ```
 
-Set `TWILIO_SECRET_ID` to the secret name or ARN and `AWS_REGION` to its region. In AWS, leave `SECRETS_MANAGER_ENDPOINT` unset: the SDK uses its default credentials chain, including the Lambda execution role. The role needs `secretsmanager:GetSecretValue` for the secret and, if the secret uses a customer-managed KMS key, `kms:Decrypt` for that key. The sender comes from the secret; the legacy `from` field in the message JSON is ignored.
+Set `TWILIO_SECRET_ID` to the secret name or ARN and `AWS_REGION` to its region. In AWS, leave `SECRETS_MANAGER_ENDPOINT` unset: the SDK uses its default credentials chain, including the Lambda execution role. The role needs `secretsmanager:GetSecretValue` for the secret and, if the secret uses a customer-managed KMS key, `kms:Decrypt` for that key. The `fromNumber` field holds the Messaging Service SID (`MG...`); the legacy `from` field in the message JSON is ignored.
 
 The secret is loaded when the application or Lambda environment starts and remains in memory for its lifetime. After rotation, restart the consumer or replace the Lambda environments to load the new value. Never log or commit real credentials.
 

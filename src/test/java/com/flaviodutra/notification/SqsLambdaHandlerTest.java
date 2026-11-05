@@ -19,7 +19,7 @@ class SqsLambdaHandlerTest {
         var event = new SQSEvent();
         event.setRecords(List.of(record("ok", "{\"to\":\"whatsapp:+5511\",\"body\":\"hello\"}"),
                 record("bad", "{\"body\":\"missing destination\"}"),
-                record("ok2", "{\"to\":\"whatsapp:+5522\",\"body\":\"hello\"}")));
+                record("ok2", "{\"to\":\"whatsapp:+5522\",\"contentSid\":\"HX123\",\"contentVariables\":{\"1\":\"Jane\"}}")));
         LambdaLogger logger = new LambdaLogger() {
             public void log(String message) {}
             public void log(byte[] message) {}
@@ -28,6 +28,7 @@ class SqsLambdaHandlerTest {
                 (proxy, method, args) -> method.getName().equals("getLogger") ? logger : null);
         var result = handler.handleRequest(event, context);
         assertEquals(2, processed.size());
+        assertEquals("Jane", processed.get(1).contentVariables().get("1"));
         assertEquals(List.of("bad"), result.getBatchItemFailures().stream().map(f -> f.getItemIdentifier()).toList());
     }
 
