@@ -1,9 +1,11 @@
 package com.flaviodutra.notification;
 
+import java.net.URI;
+
 import com.flaviodutra.notification.adapter.in.sqs.SqsConsumer;
 import com.flaviodutra.notification.config.ApplicationFactory;
 import com.flaviodutra.notification.config.ApplicationSettings;
-import java.net.URI;
+
 import software.amazon.awssdk.services.sqs.SqsClient;
 
 public class Main {
@@ -22,7 +24,8 @@ public class Main {
             }
             var consumer = new SqsConsumer(sqs, queueUrl, ApplicationFactory.create(settings));
             System.out.println("Listening to SQS queue " + queueUrl);
-            while (!Thread.currentThread().isInterrupted()) consumer.poll();
+            while (!Thread.currentThread().isInterrupted())
+                consumer.poll();
         }
     }
 }

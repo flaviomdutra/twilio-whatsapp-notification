@@ -1,15 +1,18 @@
 package com.flaviodutra.notification;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.flaviodutra.notification.adapter.in.lambda.SqsLambdaHandler;
 import com.flaviodutra.notification.domain.model.MessageToSend;
-import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class SqsLambdaHandlerTest {
     @Test
@@ -19,12 +22,17 @@ class SqsLambdaHandlerTest {
         var event = new SQSEvent();
         event.setRecords(List.of(record("ok", "{\"to\":\"whatsapp:+5511\",\"body\":\"hello\"}"),
                 record("bad", "{\"body\":\"missing destination\"}"),
-                record("ok2", "{\"to\":\"whatsapp:+5522\",\"contentSid\":\"HX123\",\"contentVariables\":{\"1\":\"Jane\"}}")));
+                record("ok2",
+                        "{\"to\":\"whatsapp:+5522\",\"contentSid\":\"HX123\",\"contentVariables\":{\"1\":\"Jane\"}}")));
         LambdaLogger logger = new LambdaLogger() {
-            public void log(String message) {}
-            public void log(byte[] message) {}
+            public void log(String message) {
+            }
+
+            public void log(byte[] message) {
+            }
         };
-        Context context = (Context) Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[]{Context.class},
+        Context context = (Context) Proxy.newProxyInstance(getClass().getClassLoader(),
+                new Class<?>[] { Context.class },
                 (proxy, method, args) -> method.getName().equals("getLogger") ? logger : null);
         var result = handler.handleRequest(event, context);
         assertEquals(2, processed.size());

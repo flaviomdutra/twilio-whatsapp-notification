@@ -2,10 +2,14 @@ package com.flaviodutra.notification.adapter.out;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
 
-/** Loads infrastructure configuration without exposing secret contents in errors or logs. */
+/**
+ * Loads infrastructure configuration without exposing secret contents in errors
+ * or logs.
+ */
 public final class SecretsManagerTwilioConfig {
     private final SecretsManagerClient client;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -24,7 +28,8 @@ public final class SecretsManagerTwilioConfig {
             if (json == null || !json.isObject()) {
                 throw new IllegalArgumentException("Twilio secret must be a JSON object");
             }
-            return new Credentials(required(json, "accountSid"), required(json, "authToken"), required(json, "fromNumber"));
+            return new Credentials(required(json, "accountSid"), required(json, "authToken"),
+                    required(json, "fromNumber"));
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
             throw new IllegalArgumentException("Twilio secret must be a valid JSON object");
         }
@@ -39,6 +44,9 @@ public final class SecretsManagerTwilioConfig {
     }
 
     public record Credentials(String accountSid, String authToken, String fromNumber) {
-        @Override public String toString() { return "Credentials[redacted]"; }
+        @Override
+        public String toString() {
+            return "Credentials[redacted]";
+        }
     }
 }

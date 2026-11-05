@@ -1,11 +1,15 @@
 package com.flaviodutra.notification;
 
-import com.flaviodutra.notification.config.ApplicationSettings;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
+import com.flaviodutra.notification.config.ApplicationSettings;
 
 class ApplicationSettingsTest {
     @Test
@@ -16,12 +20,14 @@ class ApplicationSettingsTest {
         assertEquals("test-queue", defaults.get("sqs.queue.name", "SQS_QUEUE_NAME"));
         assertEquals("", defaults.get("sqs.queue.url", "SQS_QUEUE_URL"));
         assertEquals("", settings(yaml, Map.of("SQS_ENDPOINT", "")).get("sqs.endpoint", "SQS_ENDPOINT"));
-        assertEquals("other", settings(yaml, Map.of("SQS_QUEUE_NAME", "other")).get("sqs.queue.name", "SQS_QUEUE_NAME"));
+        assertEquals("other",
+                settings(yaml, Map.of("SQS_QUEUE_NAME", "other")).get("sqs.queue.name", "SQS_QUEUE_NAME"));
     }
 
     @Test
     void loadsBundledDefaults() {
-        assertEquals("whatsapp-notifications", ApplicationSettings.load().get("sqs.queue.name", "UNUSED_TEST_VARIABLE"));
+        assertEquals("whatsapp-notifications",
+                ApplicationSettings.load().get("sqs.queue.name", "UNUSED_TEST_VARIABLE"));
         assertEquals("twilio", ApplicationSettings.load().get("whatsapp.provider", "UNUSED_TEST_VARIABLE"));
     }
 
@@ -42,10 +48,12 @@ class ApplicationSettingsTest {
     @Test
     void rejectsInvalidConfigurationStructure() throws Exception {
         assertThrows(IllegalArgumentException.class, () -> settings("- unexpected", Map.of()));
-        assertThrows(IllegalArgumentException.class, () -> settings("sqs:\n  endpoint: 123", Map.of()).get("sqs.endpoint", "SQS_ENDPOINT"));
+        assertThrows(IllegalArgumentException.class,
+                () -> settings("sqs:\n  endpoint: 123", Map.of()).get("sqs.endpoint", "SQS_ENDPOINT"));
     }
 
     private ApplicationSettings settings(String yaml, Map<String, String> environment) throws Exception {
-        return ApplicationSettings.fromYaml(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)), environment);
+        return ApplicationSettings.fromYaml(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)),
+                environment);
     }
 }

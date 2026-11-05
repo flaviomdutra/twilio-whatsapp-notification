@@ -3,7 +3,7 @@ package com.flaviodutra.notification.domain.model;
 import java.util.Map;
 
 public record MessageToSend(String to, String from, String body, String contentSid,
-                            Map<String, String> contentVariables) {
+        Map<String, String> contentVariables) {
     public MessageToSend {
         if (to == null || to.isBlank()) {
             throw new IllegalArgumentException("Message requires a destination");
@@ -17,7 +17,8 @@ public record MessageToSend(String to, String from, String body, String contentS
             if (!hasTemplate) {
                 throw new IllegalArgumentException("Content variables require a contentSid");
             }
-            if (contentVariables.entrySet().stream().anyMatch(e -> e.getKey() == null || e.getKey().isBlank() || e.getValue() == null)) {
+            if (contentVariables.entrySet().stream()
+                    .anyMatch(e -> e.getKey() == null || e.getKey().isBlank() || e.getValue() == null)) {
                 throw new IllegalArgumentException("Content variables require non-empty keys and non-null values");
             }
             contentVariables = Map.copyOf(contentVariables);

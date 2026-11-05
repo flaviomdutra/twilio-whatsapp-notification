@@ -1,15 +1,18 @@
 package com.flaviodutra.notification.config;
 
-import com.flaviodutra.notification.adapter.out.TwilioWhatsAppAdapter;
-import com.flaviodutra.notification.adapter.out.SecretsManagerTwilioConfig;
 import java.net.URI;
-import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+
+import com.flaviodutra.notification.adapter.out.SecretsManagerTwilioConfig;
+import com.flaviodutra.notification.adapter.out.TwilioWhatsAppAdapter;
 import com.flaviodutra.notification.application.port.in.ProcessMessageUseCase;
 import com.flaviodutra.notification.application.port.out.WhatsAppProviderPort;
 import com.flaviodutra.notification.domain.service.SendMessageService;
 
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+
 public final class ApplicationFactory {
-    private ApplicationFactory() {}
+    private ApplicationFactory() {
+    }
 
     public static ProcessMessageUseCase create() {
         return create(ApplicationSettings.load());
