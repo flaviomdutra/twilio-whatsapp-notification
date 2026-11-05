@@ -8,8 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flaviodutra.notification.adapter.out.TwilioWhatsAppAdapter;
 import com.flaviodutra.notification.application.port.in.ProcessMessageUseCase;
 import com.flaviodutra.notification.application.port.out.WhatsAppProviderPort;
-import com.flaviodutra.notification.domain.service.SendMessageService;
 import com.flaviodutra.notification.domain.model.MessageToSend;
+import com.flaviodutra.notification.domain.service.SendMessageService;
 public class SqsLambdaHandler implements RequestHandler<SQSEvent, Void> {
 
     private final ProcessMessageUseCase useCase;
@@ -40,7 +40,7 @@ public class SqsLambdaHandler implements RequestHandler<SQSEvent, Void> {
             context.getLogger().log("Processed SQS message " + msg.getMessageId());
         } catch (Exception e) {
             context.getLogger().log("Failed to process SQS message " + msg.getMessageId() + ": " + e.getMessage());
-            throw e;
+            throw new RuntimeException("Failed to process SQS message " + msg.getMessageId(), e);
         }
 
     }
