@@ -3,45 +3,31 @@ package com.flaviodutra.notification.adapter.in.lambda;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
-import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage;
+import com.amazonaws.services.lambda.runtime.events.SQSBatchResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flaviodutra.notification.adapter.out.TwilioWhatsAppAdapter;
 import com.flaviodutra.notification.application.port.in.ProcessMessageUseCase;
-import com.flaviodutra.notification.application.port.out.WhatsAppProviderPort;
+import com.flaviodutra.notification.config.ApplicationFactory;
 import com.flaviodutra.notification.domain.model.MessageToSend;
-import com.flaviodutra.notification.domain.service.SendMessageService;
-public class SqsLambdaHandler implements RequestHandler<SQSEvent, Void> {
+import java.util.ArrayList;
 
+public class SqsLambdaHandler implements RequestHandler<SQSEvent, SQSBatchResponse> {
     private final ProcessMessageUseCase useCase;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public SqsLambdaHandler() {
-        String accountSid = System.getenv("TWILIO_ACCOUNT_SID");
-        String authToken  = System.getenv("TWILIO_AUTH_TOKEN");
-        String fromNumber = System.getenv("TWILIO_FROM_NUMBER");
+    public SqsLambdaHandler() { this(ApplicationFactory.create()); }
+    public SqsLambdaHandler(ProcessMessageUseCase useCase) { this.useCase = useCase; }
 
-        WhatsAppProviderPort whatsAppProvider = new TwilioWhatsAppAdapter(accountSid, authToken, fromNumber);
-        this.useCase = new SendMessageService(whatsAppProvider);
-    }
-
- @Override
-    public Void handleRequest(SQSEvent sqsEvent, Context context) {
-        for (SQSMessage msg : sqsEvent.getRecords()) {
-            processMessage(msg, context);
+    @Override
+    public SQSBatchResponse handleRequest(SQSEvent event, Context context) {
+        var failures = new ArrayList<SQSBatchResponse.BatchItemFailure>();
+        for (var record : event.getRecords()) {
+            try {
+                useCase.process(mapper.readValue(record.getBody(), MessageToSend.class));
+            } catch (Exception e) {
+                context.getLogger().log("Failed SQS message " + record.getMessageId() + " (" + e.getClass().getSimpleName() + ")");
+                failures.add(new SQSBatchResponse.BatchItemFailure(record.getMessageId()));
+            }
         }
-        context.getLogger().log("done");
-        return null;
-    }
-
-    private void processMessage(SQSMessage msg, Context context) {
-        try {
-            MessageToSend message = mapper.readValue(msg.getBody(), MessageToSend.class);
-            useCase.process(message);
-            context.getLogger().log("Processed SQS message " + msg.getMessageId());
-        } catch (Exception e) {
-            context.getLogger().log("Failed to process SQS message " + msg.getMessageId() + ": " + e.getMessage());
-            throw new RuntimeException("Failed to process SQS message " + msg.getMessageId(), e);
-        }
-
+        return new SQSBatchResponse(failures);
     }
 }

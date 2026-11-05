@@ -1,0 +1,10 @@
+services:
+  localstack:
+    image: localstack/localstack:4.10.0
+    ports:
+      - "127.0.0.1:4566:4566"
+    environment:
+      SERVICES: sqs,secretsmanager
+      AWS_DEFAULT_REGION: us-east-1
+    volumes:
+      - ./docker/localstack/init.sh:/etc/localstack/init/ready.d/init.sh:ro

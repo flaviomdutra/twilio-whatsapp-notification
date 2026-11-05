@@ -1,0 +1,14 @@
+# Variáveis de ambiente têm prioridade. Endpoints vazios usam a AWS.
+sqs:
+  queue:
+    name: whatsapp-notifications
+    url: ""
+  endpoint: ""
+whatsapp:
+  provider: twilio
+twilio:
+  secret:
+    id: ""
+secrets:
+  manager:
+    endpoint: ""
