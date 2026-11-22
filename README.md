@@ -19,7 +19,7 @@ Configuration files are packaged in the JAR; changing them requires rebuilding i
 
 ## Run locally
 
-Requirements: Java 17+, Maven, and Docker Compose. Only LocalStack runs in Docker; the Java application runs on your machine.
+Requirements: Java 25+, Maven, and Docker Compose. The project targets Java 25 and its Lambda handler is intended for the AWS Lambda `java25` runtime. Only LocalStack runs in Docker; the Java application runs on your machine.
 
 ```bash
 docker compose up -d

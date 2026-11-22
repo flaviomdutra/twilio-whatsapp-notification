@@ -2,7 +2,7 @@
 
 ## Project Structure & Architecture
 
-This is a Java 17 Maven application for WhatsApp notifications. Production code lives under `src/main/java/com/flaviodutra/notification`:
+This is a Java 25 Maven application for WhatsApp notifications. Production code lives under `src/main/java/com/flaviodutra/notification`:
 
 - `domain/` contains the message model and business service; `application/port/` defines use cases and provider interfaces.
 - `adapter/in/` contains the Lambda and SQS consumers; `adapter/out/` contains the Twilio adapter. Wire implementations in `config/ApplicationFactory.java`.
@@ -12,12 +12,12 @@ Keep domain and application ports independent of AWS, Twilio, and transport deta
 
 ## Build, Test, and Development Commands
 
-Prerequisites: Java 17+, Maven, and Docker Compose.
+Prerequisites: Java 25+, Maven, and Docker Compose.
 
 - `mvn test` runs the unit tests.
 - `mvn clean package` builds and tests the application and creates the executable JAR in `target/`.
 - `docker compose up -d` starts LocalStack and initializes the SQS queues.
-- `APP_PROFILE=local AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_REGION=us-east-1 java -jar target/twilio-whatsapp-notification-1.0-SNAPSHOT.jar` starts the LocalStack consumer with simulated delivery.
+- `APP_PROFILE=local AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_REGION=us-east-1 java -jar target/twilio-whatsapp-notification-1.0-SNAPSHOT.jar` starts the LocalStack consumer with simulated delivery. The Lambda handler uses the AWS `java25` runtime.
 - `docker compose down` stops the local environment. See `README.md` for an example SQS message and DLQ inspection.
 
 ## Coding Style & Naming
